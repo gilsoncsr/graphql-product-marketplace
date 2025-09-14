@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # Oracle Database
+  oracle:
+    image: container-registry.oracle.com/database/express:21.3.0-xe
+    container_name: marketplace-oracle
+    environment:
+      - ORACLE_PWD=marketplace123
+      - ORACLE_CHARACTERSET=AL32UTF8
+    ports:
+      - "1521:1521"
+      - "5500:5500"
+    volumes:
+      - oracle_data:/opt/oracle/oradata
+      - ./db:/opt/oracle/scripts/startup
+    command: >
+      bash -c "
+        /opt/oracle/runOracle.sh &
+        while ! /opt/oracle/checkDBStatus.sh; do sleep 1; done
+        echo 'Database is ready'
+        # Run initialization scripts
+        sqlplus sys/marketplace123@XE as sysdba @/opt/oracle/scripts/startup/init.sql
+        sqlplus sys/marketplace123@XE as sysdba @/opt/oracle/scripts/startup/seed.sql
+        tail -f /opt/oracle/diag/rdbms/xe/XE/trace/alert_XE.log
+      "
+    healthcheck:
+      test: ["CMD", "sqlplus", "-L", "sys/marketplace123@XE", "as", "sysdba", "@/dev/null"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 60s
+    networks:
+      - marketplace-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: marketplace-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass marketplace123
+    healthcheck:
+      test: ["CMD", "redis-cli", "--raw", "incr", "ping"]
+      interval: 30s
+      timeout: 3s
+      retries: 5
+    networks:
+      - marketplace-network
+
+  # Marketplace API
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: marketplace-api
+    environment:
+      - NODE_ENV=production
+      - PORT=4000
+      - DB_HOST=oracle
+      - DB_PORT=1521
+      - DB_SERVICE_NAME=XE
+      - DB_USER=marketplace
+      - DB_PASSWORD=marketplace123
+      - DB_CONNECTION_STRING=oracle:1521/XE
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=marketplace123
+      - JWT_SECRET=your-super-secret-jwt-key-change-in-production
+      - JWT_REFRESH_SECRET=your-super-secret-refresh-key-change-in-production
+      - JWT_EXPIRES_IN=15m
+      - JWT_REFRESH_EXPIRES_IN=7d
+      - CORS_ORIGIN=http://localhost:3000
+      - CSRF_SECRET=your-csrf-secret-key
+      - RATE_LIMIT_WINDOW_MS=900000
+      - RATE_LIMIT_MAX_REQUESTS=100
+      - LOG_LEVEL=info
+    ports:
+      - "4000:4000"
+    depends_on:
+      oracle:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:4000/healthz"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    networks:
+      - marketplace-network
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: marketplace-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - api
+    networks:
+      - marketplace-network
+    restart: unless-stopped
+
+volumes:
+  oracle_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  marketplace-network:
+    driver: bridge

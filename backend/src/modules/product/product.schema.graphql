@@ -1,0 +1,141 @@
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  brand: String
+  sku: String
+  stockQuantity: Int!
+  isActive: Boolean!
+  seller: User!
+  createdAt: String!
+  updatedAt: String!
+  # Resolved fields
+  attributes: [ProductAttribute!]!
+  images: [ProductImage!]!
+  reviews: [Review!]!
+  averageRating: Float
+  reviewCount: Int!
+}
+
+type ProductAttribute {
+  id: ID!
+  name: String!
+  value: String!
+  createdAt: String!
+}
+
+type ProductImage {
+  id: ID!
+  url: String!
+  altText: String
+  isPrimary: Boolean!
+  sortOrder: Int!
+  createdAt: String!
+}
+
+type Review {
+  id: ID!
+  product: Product!
+  user: User!
+  rating: Int!
+  title: String
+  comment: String
+  isVerifiedPurchase: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ProductEdge {
+  node: Product!
+  cursor: String!
+}
+
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+input ProductFilter {
+  category: String
+  brand: String
+  minPrice: Float
+  maxPrice: Float
+  inStock: Boolean
+  isActive: Boolean
+}
+
+input CursorInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  brand: String
+  sku: String
+  stockQuantity: Int!
+  attributes: [ProductAttributeInput!]
+  images: [ProductImageInput!]
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Float
+  category: String
+  brand: String
+  sku: String
+  stockQuantity: Int
+  isActive: Boolean
+  attributes: [ProductAttributeInput!]
+  images: [ProductImageInput!]
+}
+
+input ProductAttributeInput {
+  name: String!
+  value: String!
+}
+
+input ProductImageInput {
+  url: String!
+  altText: String
+  isPrimary: Boolean
+  sortOrder: Int
+}
+
+input CreateReviewInput {
+  productId: ID!
+  rating: Int!
+  title: String
+  comment: String
+}
+
+extend type Query {
+  product(id: ID!): Product
+  products(filter: ProductFilter, pagination: CursorInput): ProductConnection!
+  searchProducts(q: String!, filter: ProductFilter, pagination: CursorInput): ProductConnection!
+}
+
+extend type Mutation {
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(id: ID!, input: CreateReviewInput!): Review!
+  deleteReview(id: ID!): Boolean!
+}

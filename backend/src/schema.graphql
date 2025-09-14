@@ -1,0 +1,324 @@
+# Base GraphQL Schema for Marketplace
+
+# Import all module schemas
+# This file serves as the main schema that combines all modules
+
+type Query {
+  # Health check
+  health: String!
+  
+  # User queries
+  me: User
+  
+  # Product queries
+  product(id: ID!): Product
+  products(filter: ProductFilter, pagination: CursorInput): ProductConnection!
+  searchProducts(q: String!, filter: ProductFilter, pagination: CursorInput): ProductConnection!
+  
+  # Cart queries
+  cart: [CartItem!]!
+  
+  # Order queries
+  order(id: ID!): Order
+  myOrders(pagination: CursorInput): OrderConnection!
+}
+
+type Mutation {
+  # Auth mutations
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  logout: Boolean!
+  updateProfile(input: UpdateUserInput!): User!
+  
+  # Cart mutations
+  addToCart(productId: ID!, quantity: Int!): CartItem!
+  removeFromCart(cartItemId: ID!): Boolean!
+  updateCartItem(cartItemId: ID!, quantity: Int!): CartItem!
+  
+  # Product mutations
+  createProduct(input: CreateProductInput!): Product!
+  updateProduct(id: ID!, input: UpdateProductInput!): Product!
+  deleteProduct(id: ID!): Boolean!
+  createReview(input: CreateReviewInput!): Review!
+  updateReview(id: ID!, input: CreateReviewInput!): Review!
+  deleteReview(id: ID!): Boolean!
+  
+  # Order mutations
+  createOrder(input: CreateOrderInput!): Order!
+  updateOrderStatus(id: ID!, status: OrderStatus!): Order!
+  cancelOrder(id: ID!): Order!
+}
+
+type Subscription {
+  # Order status changes
+  orderStatusChanged(userId: ID!): Order!
+}
+
+# Common types
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+# User types
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+  isAdmin: Boolean!
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  # Resolved fields
+  cart: [CartItem!]!
+  orders: [Order!]!
+  products: [Product!]! # Products sold by this user
+}
+
+type CartItem {
+  id: ID!
+  user: User!
+  product: Product!
+  quantity: Int!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type AuthPayload {
+  user: User!
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+}
+
+# Product types
+type Product {
+  id: ID!
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  brand: String
+  sku: String
+  stockQuantity: Int!
+  isActive: Boolean!
+  seller: User!
+  createdAt: String!
+  updatedAt: String!
+  # Resolved fields
+  attributes: [ProductAttribute!]!
+  images: [ProductImage!]!
+  reviews: [Review!]!
+  averageRating: Float
+  reviewCount: Int!
+}
+
+type ProductAttribute {
+  id: ID!
+  name: String!
+  value: String!
+  createdAt: String!
+}
+
+type ProductImage {
+  id: ID!
+  url: String!
+  altText: String
+  isPrimary: Boolean!
+  sortOrder: Int!
+  createdAt: String!
+}
+
+type Review {
+  id: ID!
+  product: Product!
+  user: User!
+  rating: Int!
+  title: String
+  comment: String
+  isVerifiedPurchase: Boolean!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type ProductConnection {
+  edges: [ProductEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type ProductEdge {
+  node: Product!
+  cursor: String!
+}
+
+input ProductFilter {
+  category: String
+  brand: String
+  minPrice: Float
+  maxPrice: Float
+  inStock: Boolean
+  isActive: Boolean
+}
+
+input CursorInput {
+  first: Int
+  after: String
+  last: Int
+  before: String
+}
+
+input CreateProductInput {
+  name: String!
+  description: String
+  price: Float!
+  category: String!
+  brand: String
+  sku: String
+  stockQuantity: Int!
+  attributes: [ProductAttributeInput!]
+  images: [ProductImageInput!]
+}
+
+input UpdateProductInput {
+  name: String
+  description: String
+  price: Float
+  category: String
+  brand: String
+  sku: String
+  stockQuantity: Int
+  isActive: Boolean
+  attributes: [ProductAttributeInput!]
+  images: [ProductImageInput!]
+}
+
+input ProductAttributeInput {
+  name: String!
+  value: String!
+}
+
+input ProductImageInput {
+  url: String!
+  altText: String
+  isPrimary: Boolean
+  sortOrder: Int
+}
+
+input CreateReviewInput {
+  productId: ID!
+  rating: Int!
+  title: String
+  comment: String
+}
+
+# Order types
+type Order {
+  id: ID!
+  user: User!
+  status: OrderStatus!
+  totalAmount: Float!
+  shippingAddress: String!
+  billingAddress: String!
+  paymentMethod: String!
+  paymentStatus: PaymentStatus!
+  trackingNumber: String
+  notes: String
+  createdAt: String!
+  updatedAt: String!
+  # Resolved fields
+  items: [OrderItem!]!
+}
+
+type OrderItem {
+  id: ID!
+  order: Order!
+  product: Product!
+  quantity: Int!
+  unitPrice: Float!
+  totalPrice: Float!
+  createdAt: String!
+}
+
+enum OrderStatus {
+  PENDING
+  CONFIRMED
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+  REFUNDED
+}
+
+input PaymentInput {
+  method: String!
+  cardNumber: String
+  expiryDate: String
+  cvv: String
+  billingAddress: String!
+  shippingAddress: String!
+  notes: String
+}
+
+input CreateOrderInput {
+  items: [OrderItemInput!]!
+  payment: PaymentInput!
+}
+
+input OrderItemInput {
+  productId: ID!
+  quantity: Int!
+}
+
+type OrderConnection {
+  edges: [OrderEdge!]!
+  pageInfo: PageInfo!
+  totalCount: Int!
+}
+
+type OrderEdge {
+  node: Order!
+  cursor: String!
+}

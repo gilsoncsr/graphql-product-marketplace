@@ -1,0 +1,212 @@
+@import '@/styles/variables.scss';
+
+.btn {
+  @include button-reset;
+  @include flex-center;
+  position: relative;
+  border-radius: var(--border-radius-md);
+  font-weight: var(--font-weight-medium);
+  text-align: center;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+  white-space: nowrap;
+  gap: var(--spacing-2);
+
+  // Sizes
+  &--sm {
+    padding: var(--spacing-2) var(--spacing-3);
+    font-size: var(--font-size-sm);
+    min-height: 32px;
+  }
+
+  &--md {
+    padding: var(--spacing-3) var(--spacing-4);
+    font-size: var(--font-size-base);
+    min-height: 40px;
+  }
+
+  &--lg {
+    padding: var(--spacing-4) var(--spacing-6);
+    font-size: var(--font-size-lg);
+    min-height: 48px;
+  }
+
+  // Variants
+  &--primary {
+    background-color: var(--primary-color);
+    color: var(--white);
+    border: 1px solid var(--primary-color);
+
+    @include hover {
+      background-color: var(--primary-hover);
+      border-color: var(--primary-hover);
+    }
+
+    &:focus {
+      @include focus;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  &--secondary {
+    background-color: var(--secondary-color);
+    color: var(--white);
+    border: 1px solid var(--secondary-color);
+
+    @include hover {
+      background-color: var(--secondary-hover);
+      border-color: var(--secondary-hover);
+    }
+
+    &:focus {
+      @include focus;
+      box-shadow: 0 0 0 3px rgba(100, 116, 139, 0.1);
+    }
+  }
+
+  &--outline {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+
+    @include hover {
+      background-color: var(--primary-color);
+      color: var(--white);
+    }
+
+    &:focus {
+      @include focus;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  &--ghost {
+    background-color: transparent;
+    color: var(--primary-color);
+    border: 1px solid transparent;
+
+    @include hover {
+      background-color: var(--primary-light);
+    }
+
+    &:focus {
+      @include focus;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+    }
+  }
+
+  &--danger {
+    background-color: var(--error-color);
+    color: var(--white);
+    border: 1px solid var(--error-color);
+
+    @include hover {
+      background-color: #dc2626;
+      border-color: #dc2626;
+    }
+
+    &:focus {
+      @include focus;
+      box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+    }
+  }
+
+  // States
+  &--loading {
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &--disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+  }
+
+  &--full-width {
+    width: 100%;
+  }
+
+  // Icons
+  &__left-icon,
+  &__right-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  &__content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-1);
+  }
+
+  // Spinner
+  &__spinner {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__spinner-icon {
+    width: 16px;
+    height: 16px;
+    animation: spin 1s linear infinite;
+  }
+
+  &__spinner-circle {
+    animation: dash 1.5s ease-in-out infinite;
+  }
+
+  // Loading state - hide content
+  &--loading &__content {
+    opacity: 0;
+  }
+
+  &--loading &__left-icon,
+  &--loading &__right-icon {
+    opacity: 0;
+  }
+}
+
+// Animations
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 150;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 90, 150;
+    stroke-dashoffset: -124;
+  }
+}
+
+// Responsive
+@include responsive(sm) {
+  .btn {
+    &--sm {
+      padding: var(--spacing-2) var(--spacing-4);
+    }
+  }
+}

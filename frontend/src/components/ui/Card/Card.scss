@@ -1,0 +1,93 @@
+@import '@/styles/variables.scss';
+
+.card {
+  @include card;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.2s ease;
+
+  // Variants
+  &--default {
+    background-color: var(--white);
+    border: 1px solid var(--gray-200);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &--elevated {
+    background-color: var(--white);
+    border: none;
+    box-shadow: var(--shadow-lg);
+  }
+
+  &--outlined {
+    background-color: var(--white);
+    border: 2px solid var(--gray-300);
+    box-shadow: none;
+  }
+
+  &--filled {
+    background-color: var(--gray-50);
+    border: 1px solid var(--gray-200);
+    box-shadow: none;
+  }
+
+  // Padding
+  &--padding-none {
+    padding: 0;
+  }
+
+  &--padding-sm {
+    padding: var(--spacing-4);
+  }
+
+  &--padding-md {
+    padding: var(--spacing-6);
+  }
+
+  &--padding-lg {
+    padding: var(--spacing-8);
+  }
+
+  // States
+  &--hover {
+    @include hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-xl);
+    }
+  }
+
+  &--clickable {
+    cursor: pointer;
+    user-select: none;
+
+    &:focus {
+      outline: 2px solid var(--primary-color);
+      outline-offset: 2px;
+    }
+
+    @include hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    &:active {
+      transform: translateY(0);
+      box-shadow: var(--shadow-sm);
+    }
+  }
+
+  // Responsive
+  @include responsive(sm) {
+    &--padding-sm {
+      padding: var(--spacing-5);
+    }
+
+    &--padding-md {
+      padding: var(--spacing-7);
+    }
+
+    &--padding-lg {
+      padding: var(--spacing-10);
+    }
+  }
+}

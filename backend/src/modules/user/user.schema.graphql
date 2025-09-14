@@ -1,0 +1,78 @@
+type User {
+  id: ID!
+  email: String!
+  firstName: String!
+  lastName: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+  isAdmin: Boolean!
+  isActive: Boolean!
+  createdAt: String!
+  updatedAt: String!
+  # Resolved fields
+  cart: [CartItem!]!
+  orders: [Order!]!
+  products: [Product!]! # Products sold by this user
+}
+
+type CartItem {
+  id: ID!
+  user: User!
+  product: Product!
+  quantity: Int!
+  createdAt: String!
+  updatedAt: String!
+}
+
+type AuthPayload {
+  user: User!
+  accessToken: String!
+  refreshToken: String!
+}
+
+input RegisterInput {
+  email: String!
+  password: String!
+  firstName: String!
+  lastName: String!
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+}
+
+input LoginInput {
+  email: String!
+  password: String!
+}
+
+input UpdateUserInput {
+  firstName: String
+  lastName: String
+  phone: String
+  address: String
+  city: String
+  state: String
+  zipCode: String
+  country: String
+}
+
+extend type Query {
+  me: User
+}
+
+extend type Mutation {
+  register(input: RegisterInput!): AuthPayload!
+  login(input: LoginInput!): AuthPayload!
+  logout: Boolean!
+  updateProfile(input: UpdateUserInput!): User!
+  addToCart(productId: ID!, quantity: Int!): CartItem!
+  removeFromCart(cartItemId: ID!): Boolean!
+  updateCartItem(cartItemId: ID!, quantity: Int!): CartItem!
+}
