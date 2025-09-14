@@ -127,16 +127,6 @@ This system provides a seamless integration between **frontend, backend, and dat
 
 ---
 
-## 🌐 Deployment
-
-- **Docker Compose** for local orchestration (API + DB + Frontend).
-- Optional **Kubernetes manifests** for cloud-native deployment.
-- Cloud-ready: AWS (EKS), Azure (AKS), GCP (GKE).
-
----
-
 ## 🎯 Why This Project
 
 This project was designed to **demonstrate expertise** in modern frontend engineering with React & TypeScript, while also covering critical backend concerns (GraphQL, APIs, authentication, database integration, performance, testing, and deployment practices).
-
-It addresses the main requirements of a **Frontend Developer position** while showing flexibility to collaborate across the stack, aligning with **agile methodologies** and real-world engineering challenges.
